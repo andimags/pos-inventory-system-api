@@ -8,7 +8,10 @@ router.post('/login', async function (req, res, next) {
     try {
         const { email, password } = req.body;
 
-        const user = await User.findOne({ where: { email: email } });
+        const user = await User.findOne({
+            attributes: { include: ['password'] },
+            where: { email: email }
+        });
 
         if (!user) {
             return res.json({
