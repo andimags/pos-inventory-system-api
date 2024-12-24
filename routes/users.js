@@ -2,8 +2,9 @@ const express = require('express');
 const router = express.Router();
 const { User } = require('../models/index');
 const bcrypt = require('bcrypt');
+const authMiddleware = require('../middlewares/authMiddleware');
 
-router.get('/:id', async function (req, res) {
+router.get('/:id', authMiddleware, async function (req, res) {
     try {
         const { id } = req.params;
         const user = await User.findByPk(id);
@@ -28,7 +29,7 @@ router.get('/:id', async function (req, res) {
     }
 });
 
-router.get('/', async function (req, res) {
+router.get('/', authMiddleware, async function (req, res) {
     try {
         const users = await User.findAll();
 
@@ -45,7 +46,7 @@ router.get('/', async function (req, res) {
     }
 });
 
-router.post('/', async function (req, res) {
+router.post('/', authMiddleware, async function (req, res) {
     try {
         const hashedPassword = bcrypt.hashSync(req.body.password, 10);
         req.body.password = hashedPassword
@@ -64,7 +65,7 @@ router.post('/', async function (req, res) {
     }
 });
 
-router.put('/:id', async function (req, res) {
+router.put('/:id', authMiddleware, async function (req, res) {
     try {
         const { id } = req.params;
         const user = await User.findByPk(id)
@@ -94,7 +95,7 @@ router.put('/:id', async function (req, res) {
     }
 });
 
-router.delete('/:id', async function (req, res) {
+router.delete('/:id', authMiddleware, async function (req, res) {
     try {
         const { id } = req.params;
         const user = await User.findByPk(id);

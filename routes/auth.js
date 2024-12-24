@@ -46,7 +46,7 @@ router.post('/login', async function (req, res, next) {
         })
     }
     catch (err) {
-        res.json({
+        return res.json({
             status: 0,
             message: `Something went wrong: ${err.message}`
         })
@@ -57,14 +57,14 @@ router.post('/verify-token', function (req, res, next) {
     try {
         const { token } = req.body;
         const decoded = jwt.verify(token, process.env.PRIVATE_KEY);
-        res.json({
+        return res.json({
             status: 1,
             message: "Token verified.",
             data: decoded
         })
     }
     catch (err) {
-        res.json({
+        return res.json({
             status: 0,
             message: `Something went wrong: ${err.message}`
         })
