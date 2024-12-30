@@ -9,6 +9,7 @@ const usersRouter = require('./routes/users');
 const authRouter = require('./routes/auth');
 const supplierRouter = require('./routes/suppliers');
 const productRouter = require('./routes/products');
+const categoryRouter = require('./routes/categories');
 
 const dotenv = require('dotenv');
 dotenv.config();
@@ -30,6 +31,7 @@ app.use('/users', usersRouter);
 app.use('/auth', authRouter);
 app.use('/suppliers', supplierRouter);
 app.use('/products', productRouter);
+app.use('/categories', categoryRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
