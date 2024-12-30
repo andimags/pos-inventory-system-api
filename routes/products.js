@@ -7,7 +7,7 @@ const authMiddleware = require('../middlewares/authMiddleware');
 router.get('/:id', authMiddleware, async function (req, res) {
     try {
         const { id } = req.params;
-        const product = await Product.findByPk(id);
+        const product = await Product.scope('withCategories').findByPk(id);
 
         if (!product) {
             return res.json({
@@ -31,7 +31,7 @@ router.get('/:id', authMiddleware, async function (req, res) {
 
 router.get('/', authMiddleware, async function (req, res) {
     try {
-        const products = await Product.findAll({
+        const products = await Product.scope(['withCategories']).findAll({
             order: [
                 ['created_at', 'DESC'],
             ],
@@ -52,12 +52,18 @@ router.get('/', authMiddleware, async function (req, res) {
 
 router.post('/', authMiddleware, async function (req, res) {
     try {
+        const { category_ids } = req.body;
+
         const product = await Product.create(req.body);
+
+        await product.setCategories(category_ids);
+
+        const productWithCategories = await Product.scope('withCategories').findByPk(product.id);
 
         return res.json({
             status: 1,
-            data: product
-        })
+            data: productWithCategories
+        });
     }
     catch (err) {
         res.json({
@@ -79,11 +85,13 @@ router.put('/:id', authMiddleware, async function (req, res) {
             })
         }
 
-        const updatedSupplier = await product.update(req.body);
+        await product.update(req.body);
+
+        const productWithCategories = await Product.scope('withCategories').findByPk(product.id);
 
         return res.json({
             status: 1,
-            data: updatedSupplier
+            data: productWithCategories
         })
     }
     catch (err) {

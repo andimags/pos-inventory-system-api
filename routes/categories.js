@@ -1,13 +1,12 @@
 const express = require('express');
 const router = express.Router();
 const { Category } = require('../models/index');
-const bcrypt = require('bcrypt');
 const authMiddleware = require('../middlewares/authMiddleware');
 
 router.get('/:id', authMiddleware, async function (req, res) {
     try {
         const { id } = req.params;
-        const category = await Category.findByPk(id);
+        const category = await Category.scope(['withProducts']).findByPk(id);
 
         if (!category) {
             return res.json({
@@ -31,7 +30,7 @@ router.get('/:id', authMiddleware, async function (req, res) {
 
 router.get('/', authMiddleware, async function (req, res) {
     try {
-        const categories = await Category.findAll({
+        const categories = await Category.scope(['withProducts']).findAll({
             order: [
                 ['created_at', 'DESC'],
             ],
