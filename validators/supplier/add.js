@@ -13,7 +13,7 @@ const addSupplierValidator = [
 
     body('contact_name')
         .notEmpty().withMessage('Contact name is required')
-        .matches(/^[A-Za-z\s]+$/).withMessage('Invalid first name format'),
+        .matches(/^[A-Za-z\s]+$/).withMessage('Invalid contact name format'),
 
     body('contact_email')
         .optional({ nullable: true, checkFalsy: true })
