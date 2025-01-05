@@ -1,8 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { Category } = require('../models/index');
 const authMiddleware = require('../middlewares/authMiddleware');
-const { validationResult } = require('express-validator');
 
 // Validators
 const findCategoryValidator = require('../validators/category/find');

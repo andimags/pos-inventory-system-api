@@ -1,4 +1,5 @@
-const { Category } = require('../models/index');
+const express = require('express');
+const { Product } = require('../models/index');
 const { validationResult } = require('express-validator');
 
 const categoryController = {
@@ -11,18 +12,18 @@ const categoryController = {
             }
 
             const { id } = req.params;
-            const category = await Category.scope(['withProducts']).findByPk(id);
+            const product = await Product.scope('withCategories').findByPk(id);
 
-            if (!category) {
+            if (!product) {
                 return res.json({
                     status: 0,
-                    message: 'Category not found.'
+                    message: 'Product not found.'
                 })
             }
 
             return res.json({
                 status: 1,
-                data: category
+                data: product
             })
         }
         catch (err) {
@@ -32,9 +33,9 @@ const categoryController = {
             })
         }
     },
-    get: async (req, res) => {
+    get:    async (req, res) => {
         try {
-            const categories = await Category.scope(['withProducts']).findAll({
+            const products = await Product.scope(['withCategories']).findAll({
                 order: [
                     ['created_at', 'DESC'],
                 ],
@@ -42,7 +43,7 @@ const categoryController = {
 
             return res.json({
                 status: 1,
-                data: categories
+                data: products
             })
         }
         catch (err) {
@@ -60,12 +61,18 @@ const categoryController = {
                 return res.json(error);
             }
 
-            const category = await Category.create(req.body);
+            const { category_ids } = req.body;
+
+            const product = await Product.create(req.body);
+
+            await product.setCategories(category_ids);
+
+            const productWithCategories = await Product.scope('withCategories').findByPk(product.id);
 
             return res.json({
                 status: 1,
-                data: category
-            })
+                data: productWithCategories
+            });
         }
         catch (err) {
             res.json({
@@ -83,20 +90,22 @@ const categoryController = {
             }
 
             const { id } = req.params;
-            const category = await Category.findByPk(id)
+            const product = await Product.findByPk(id)
 
-            if (!category) {
+            if (!product) {
                 return res.json({
                     status: 0,
-                    message: 'Category not found.'
+                    message: 'Product not found.'
                 })
             }
 
-            const updatedSupplier = await category.update(req.body);
+            await product.update(req.body);
+
+            const productWithCategories = await Product.scope('withCategories').findByPk(product.id);
 
             return res.json({
                 status: 1,
-                data: updatedSupplier
+                data: productWithCategories
             })
         }
         catch (err) {
@@ -108,27 +117,21 @@ const categoryController = {
     },
     delete: async (req, res) => {
         try {
-            const error = validationResult(req);
-
-            if (!error.isEmpty()) {
-                return res.json(error);
-            }
-
             const { id } = req.params;
-            const category = await Category.findByPk(id);
+            const product = await Product.findByPk(id);
 
-            if (!category) {
+            if (!product) {
                 return res.json({
                     status: 0,
-                    message: 'Category not found.'
+                    message: 'Product not found.'
                 })
             }
 
-            await category.destroy();
+            await product.destroy();
 
             return res.json({
                 status: 1,
-                message: "Category successfully deleted."
+                message: "Product successfully deleted."
             })
         }
         catch (err) {

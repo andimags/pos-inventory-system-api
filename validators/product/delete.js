@@ -1,7 +1,7 @@
 const { param } = require('express-validator');
 
-const findProductValidator = [
+const deleteProductValidator = [
     param('id').isInt().withMessage('ID must be an integer')
 ]
 
-module.exports = findProductValidator;
+module.exports = deleteProductValidator;
