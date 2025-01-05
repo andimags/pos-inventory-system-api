@@ -1,7 +1,7 @@
-const { Product } = require('../models/index');
+const { Supplier } = require('../models/index');
 const { validationResult } = require('express-validator');
 
-const categoryController = {
+const supplierController = {
     find: async (req, res) => {
         try {
             const error = validationResult(req);
@@ -11,18 +11,18 @@ const categoryController = {
             }
 
             const { id } = req.params;
-            const product = await Product.scope('withCategories').findByPk(id);
-
-            if (!product) {
+            const supplier = await Supplier.findByPk(id);
+    
+            if (!supplier) {
                 return res.json({
                     status: 0,
-                    message: 'Product not found.'
+                    message: 'Supplier not found.'
                 })
             }
-
+    
             return res.json({
                 status: 1,
-                data: product
+                data: supplier
             })
         }
         catch (err) {
@@ -32,17 +32,17 @@ const categoryController = {
             })
         }
     },
-    get:    async (req, res) => {
+    get: async (req, res) => {
         try {
-            const products = await Product.scope(['withCategories']).findAll({
+            const suppliers = await Supplier.findAll({
                 order: [
                     ['created_at', 'DESC'],
-                ],
+                ]
             });
-
+    
             return res.json({
                 status: 1,
-                data: products
+                data: suppliers
             })
         }
         catch (err) {
@@ -60,18 +60,12 @@ const categoryController = {
                 return res.json(error);
             }
 
-            const { category_ids } = req.body;
-
-            const product = await Product.create(req.body);
-
-            await product.setCategories(category_ids);
-
-            const productWithCategories = await Product.scope('withCategories').findByPk(product.id);
-
+            const supplier = await Supplier.create(req.body);
+    
             return res.json({
                 status: 1,
-                data: productWithCategories
-            });
+                data: supplier
+            })
         }
         catch (err) {
             res.json({
@@ -89,22 +83,20 @@ const categoryController = {
             }
 
             const { id } = req.params;
-            const product = await Product.findByPk(id)
-
-            if (!product) {
+            const supplier = await Supplier.findByPk(id)
+    
+            if (!supplier) {
                 return res.json({
                     status: 0,
-                    message: 'Product not found.'
+                    message: 'Supplier not found.'
                 })
             }
-
-            await product.update(req.body);
-
-            const productWithCategories = await Product.scope('withCategories').findByPk(product.id);
-
+    
+            const updatedSupplier = await supplier.update(req.body);
+    
             return res.json({
                 status: 1,
-                data: productWithCategories
+                data: updatedSupplier
             })
         }
         catch (err) {
@@ -116,21 +108,27 @@ const categoryController = {
     },
     delete: async (req, res) => {
         try {
-            const { id } = req.params;
-            const product = await Product.findByPk(id);
+            const error = validationResult(req);
 
-            if (!product) {
-                return res.json({
-                    status: 0,
-                    message: 'Product not found.'
-                })
+            if (!error.isEmpty()) {
+                return res.json(error);
             }
 
-            await product.destroy();
-
+            const { id } = req.params;
+            const supplier = await Supplier.findByPk(id);
+    
+            if (!supplier) {
+                return res.json({
+                    status: 0,
+                    message: 'Supplier not found.'
+                })
+            }
+    
+            await supplier.destroy();
+    
             return res.json({
                 status: 1,
-                message: "Product successfully deleted."
+                message: "Supplier successfully deleted."
             })
         }
         catch (err) {
@@ -142,4 +140,4 @@ const categoryController = {
     }
 }
 
-module.exports = categoryController;
+module.exports = supplierController;

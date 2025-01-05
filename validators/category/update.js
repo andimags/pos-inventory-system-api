@@ -7,10 +7,13 @@ const updateCategoryValidator = [
     body('name')
         .notEmpty().withMessage('Name is required')
         .custom(async value => {
-            const categoryExists = await Category.findOne({ where: { name: value } });
-            if (categoryExists) {
-                throw new Error('Name already exists');
+            if (value !== req.body.old_name) {
+                const categoryExists = await Category.findOne({ where: { name: value } });
+                if (categoryExists) {
+                    throw new Error('Name already exists');
+                }
             }
+            return true;
         }),
 
     body('description')
