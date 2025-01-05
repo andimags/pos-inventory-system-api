@@ -1,8 +1,10 @@
-const { User } = require('../models/index');
+const express = require('express');
+const router = express.Router();
+const { Category } = require('../models/index');
+const authMiddleware = require('../middlewares/authMiddleware');
 const { validationResult } = require('express-validator');
-const bcrypt = require('bcrypt');
 
-const userController = {
+const categoryController = {
     find: async (req, res) => {
         try {
             const error = validationResult(req);
@@ -12,18 +14,18 @@ const userController = {
             }
 
             const { id } = req.params;
-            const user = await User.findByPk(id);
+            const category = await Category.scope(['withProducts']).findByPk(id);
 
-            if (!user) {
+            if (!category) {
                 return res.json({
                     status: 0,
-                    message: 'User not found.'
+                    message: 'Category not found.'
                 })
             }
 
             return res.json({
                 status: 1,
-                data: user
+                data: category
             })
         }
         catch (err) {
@@ -35,11 +37,15 @@ const userController = {
     },
     get: async (req, res) => {
         try {
-            const users = await User.findAll();
+            const categories = await Category.scope(['withProducts']).findAll({
+                order: [
+                    ['created_at', 'DESC'],
+                ],
+            });
 
             return res.json({
                 status: 1,
-                data: users
+                data: categories
             })
         }
         catch (err) {
@@ -57,14 +63,11 @@ const userController = {
                 return res.json(error);
             }
 
-            const hashedPassword = bcrypt.hashSync(req.body.password, 10);
-            req.body.password = hashedPassword
-            let user = await User.create(req.body);
-            user = await User.findByPk(user.id); // query again to remove pw
+            const category = await Category.create(req.body);
 
             return res.json({
                 status: 1,
-                data: user
+                data: category
             })
         }
         catch (err) {
@@ -83,24 +86,20 @@ const userController = {
             }
 
             const { id } = req.params;
-            const user = await User.findByPk(id)
+            const category = await Category.findByPk(id)
 
-            if (!user) {
+            if (!category) {
                 return res.json({
                     status: 0,
-                    message: 'User not found.'
+                    message: 'Category not found.'
                 })
             }
 
-            const hashedPassword = bcrypt.hashSync(req.body.password, 10);
-            req.body.password = hashedPassword
+            const updatedSupplier = await category.update(req.body);
 
-            let updatedUser = await user.update(req.body);
-            updatedUser = await User.findByPk(updatedUser.id); // query again to remove pw
-    
             return res.json({
                 status: 1,
-                data: updatedUser
+                data: updatedSupplier
             })
         }
         catch (err) {
@@ -119,20 +118,20 @@ const userController = {
             }
 
             const { id } = req.params;
-            const user = await User.findByPk(id);
+            const category = await Category.findByPk(id);
 
-            if (!user) {
+            if (!category) {
                 return res.json({
                     status: 0,
-                    message: 'User not found.'
+                    message: 'Category not found.'
                 })
             }
 
-            await user.destroy();
+            await category.destroy();
 
             return res.json({
                 status: 1,
-                message: "User successfully deleted."
+                message: "Category successfully deleted."
             })
         }
         catch (err) {
@@ -144,4 +143,4 @@ const userController = {
     }
 }
 
-module.exports = userController;
+module.exports = categoryController;

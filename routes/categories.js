@@ -2,122 +2,44 @@ const express = require('express');
 const router = express.Router();
 const { Category } = require('../models/index');
 const authMiddleware = require('../middlewares/authMiddleware');
+const { validationResult } = require('express-validator');
 
-router.get('/:id', authMiddleware, async function (req, res) {
-    try {
-        const { id } = req.params;
-        const category = await Category.scope(['withProducts']).findByPk(id);
+// Validators
+const findCategoryValidator = require('../validators/category/find');
+const addCategoryValidator = require('../validators/category/add');
+const updateCategoryValidator = require('../validators/category/update');
+const deleteCategoryValidator = require('../validators/category/delete');
 
-        if (!category) {
-            return res.json({
-                status: 0,
-                message: 'Category not found.'
-            })
-        }
+// Controller
+const categoryController = require('../controllers/categoryController');
 
-        return res.json({
-            status: 1,
-            data: category
-        })
-    }
-    catch (err) {
-        res.json({
-            status: 0,
-            message: `Something went wrong: ${err.message}`
-        })
-    }
-});
+router.get('/:id',
+    findCategoryValidator,
+    authMiddleware,
+    categoryController.find
+);
 
-router.get('/', authMiddleware, async function (req, res) {
-    try {
-        const categories = await Category.scope(['withProducts']).findAll({
-            order: [
-                ['created_at', 'DESC'],
-            ],
-        });
+router.get('/',
+    authMiddleware,
+    categoryController.get
+);
 
-        return res.json({
-            status: 1,
-            data: categories
-        })
-    }
-    catch (err) {
-        res.json({
-            status: 0,
-            message: `Something went wrong: ${err.message}`
-        })
-    }
-});
+router.post('/',
+    addCategoryValidator,
+    authMiddleware,
+    categoryController.add
+);
 
-router.post('/', authMiddleware, async function (req, res) {
-    try {
-        const category = await Category.create(req.body);
+router.put('/:id',
+    updateCategoryValidator,
+    authMiddleware,
+    categoryController.update
+);
 
-        return res.json({
-            status: 1,
-            data: category
-        })
-    }
-    catch (err) {
-        res.json({
-            status: 0,
-            message: `Something went wrong: ${err.message}`
-        })
-    }
-});
-
-router.put('/:id', authMiddleware, async function (req, res) {
-    try {
-        const { id } = req.params;
-        const category = await Category.findByPk(id)
-
-        if (!category) {
-            return res.json({
-                status: 0,
-                message: 'Category not found.'
-            })
-        }
-
-        const updatedSupplier = await category.update(req.body);
-
-        return res.json({
-            status: 1,
-            data: updatedSupplier
-        })
-    }
-    catch (err) {
-        res.json({
-            status: 0,
-            message: `Something went wrong: ${err.message}`
-        })
-    }
-});
-
-router.delete('/:id', authMiddleware, async function (req, res) {
-    try {
-        const { id } = req.params;
-        const category = await Category.findByPk(id);
-
-        if (!category) {
-            return res.json({
-                status: 0,
-                message: 'Category not found.'
-            })
-        }
-
-        await category.destroy();
-
-        return res.json({
-            status: 1,
-            message: "Category successfully deleted."
-        })
-    }
-    catch (err) {
-        res.json({
-            status: 0,
-            message: `Something went wrong: ${err.message}`
-        })
-    }
-});
+router.delete('/:id',
+    deleteCategoryValidator,
+    authMiddleware,
+    categoryController.delete
+);
 
 module.exports = router;
