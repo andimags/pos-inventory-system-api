@@ -1,7 +1,7 @@
-const { Product } = require('../models/index');
+const { Manufacturer } = require('../models/index');
 const { validationResult } = require('express-validator');
 
-const productController = {
+const manufacturerController = {
     find: async (req, res) => {
         try {
             const error = validationResult(req);
@@ -11,18 +11,18 @@ const productController = {
             }
 
             const { id } = req.params;
-            const product = await Product.scope('withCategories').findByPk(id);
+            const manufacturer = await Manufacturer.scope('withProducts').findByPk(id);
 
-            if (!product) {
+            if (!manufacturer) {
                 return res.json({
                     status: 0,
-                    message: 'Product not found.'
+                    message: 'Manufacturer not found.'
                 })
             }
 
             return res.json({
                 status: 1,
-                data: product
+                data: manufacturer
             })
         }
         catch (err) {
@@ -34,7 +34,7 @@ const productController = {
     },
     get:    async (req, res) => {
         try {
-            const products = await Product.scope(['withCategories']).findAll({
+            const manufacturers = await Manufacturer.scope(['withProducts']).findAll({
                 order: [
                     ['created_at', 'DESC'],
                 ],
@@ -42,7 +42,7 @@ const productController = {
 
             return res.json({
                 status: 1,
-                data: products
+                data: manufacturers
             })
         }
         catch (err) {
@@ -60,17 +60,11 @@ const productController = {
                 return res.json(error);
             }
 
-            const { category_ids } = req.body;
-
-            const product = await Product.create(req.body);
-
-            await product.setCategories(category_ids);
-
-            const productWithCategories = await Product.scope('withCategories').findByPk(product.id);
+            let manufacturer = await Manufacturer.create(req.body);
 
             return res.json({
                 status: 1,
-                data: productWithCategories
+                data: manufacturer
             });
         }
         catch (err) {
@@ -89,22 +83,22 @@ const productController = {
             }
 
             const { id } = req.params;
-            const product = await Product.findByPk(id)
+            let manufacturer = await Manufacturer.findByPk(id)
 
-            if (!product) {
+            if (!manufacturer) {
                 return res.json({
                     status: 0,
-                    message: 'Product not found.'
+                    message: 'Manufacturer not found.'
                 })
             }
 
-            await product.update(req.body);
+            await manufacturer.update(req.body);
 
-            const productWithCategories = await Product.scope('withCategories').findByPk(product.id);
+            manufacturer = await Manufacturer.scope('withProducts').findByPk(manufacturer.id);
 
             return res.json({
                 status: 1,
-                data: productWithCategories
+                data: manufacturer
             })
         }
         catch (err) {
@@ -123,20 +117,20 @@ const productController = {
             }
             
             const { id } = req.params;
-            const product = await Product.findByPk(id);
+            const manufacturer = await Manufacturer.findByPk(id);
 
-            if (!product) {
+            if (!manufacturer) {
                 return res.json({
                     status: 0,
-                    message: 'Product not found.'
+                    message: 'Manufacturer not found.'
                 })
             }
 
-            await product.destroy();
+            await manufacturer.destroy();
 
             return res.json({
                 status: 1,
-                message: "Product successfully deleted."
+                message: "Manufacturer successfully deleted."
             })
         }
         catch (err) {
@@ -148,4 +142,4 @@ const productController = {
     }
 }
 
-module.exports = productController;
+module.exports = manufacturerController;

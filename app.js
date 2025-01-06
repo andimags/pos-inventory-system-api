@@ -11,6 +11,7 @@ const supplierRouter = require('./routes/suppliers');
 const productRouter = require('./routes/products');
 const categoryRouter = require('./routes/categories');
 const stockRouter = require('./routes/stocks');
+const manufacturerRouter = require('./routes/manufacturers');
 
 const dotenv = require('dotenv');
 dotenv.config();
@@ -31,6 +32,7 @@ app.use('/', indexRouter);
 app.use('/users', usersRouter);
 app.use('/auth', authRouter);
 app.use('/suppliers', supplierRouter);
+app.use('/manufacturers', manufacturerRouter);
 app.use('/products', productRouter);
 app.use('/categories', categoryRouter);
 app.use('/stocks', stockRouter);
