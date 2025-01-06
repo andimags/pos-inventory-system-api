@@ -21,6 +21,20 @@ module.exports = (sequelize, DataTypes) => {
             Product.hasMany(models.Stock, {
                 foreignKey: 'product_id',
             });
+
+            Product.belongsTo(models.Manufacturer, {
+                as: 'manufacturer',
+                foreignKey: {
+                    name: 'manufacturer_id',
+                },
+            });
+
+            Product.addScope('withManufacturer', {
+                include: [{
+                    model: models.Manufacturer,
+                    as: 'manufacturer',
+                }]
+            });
         
             Product.addScope('withCategories', {
                 include: [{

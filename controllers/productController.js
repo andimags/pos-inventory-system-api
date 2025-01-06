@@ -11,7 +11,7 @@ const productController = {
             }
 
             const { id } = req.params;
-            const product = await Product.scope('withCategories').findByPk(id);
+            const product = await Product.scope(['withCategories', 'withManufacturer']).findByPk(id);
 
             if (!product) {
                 return res.json({
@@ -34,7 +34,7 @@ const productController = {
     },
     get:    async (req, res) => {
         try {
-            const products = await Product.scope(['withCategories']).findAll({
+            const products = await Product.scope(['withCategories', 'withManufacturer']).findAll({
                 order: [
                     ['created_at', 'DESC'],
                 ],
@@ -62,15 +62,15 @@ const productController = {
 
             const { category_ids } = req.body;
 
-            const product = await Product.create(req.body);
+            let product = await Product.create(req.body);
 
             await product.setCategories(category_ids);
 
-            const productWithCategories = await Product.scope('withCategories').findByPk(product.id);
+            product = await Product.scope(['withCategories', 'withManufacturer']).findByPk(product.id);
 
             return res.json({
                 status: 1,
-                data: productWithCategories
+                data: product
             });
         }
         catch (err) {
@@ -89,7 +89,7 @@ const productController = {
             }
 
             const { id } = req.params;
-            const product = await Product.findByPk(id)
+            let product = await Product.findByPk(id)
 
             if (!product) {
                 return res.json({
@@ -100,11 +100,11 @@ const productController = {
 
             await product.update(req.body);
 
-            const productWithCategories = await Product.scope('withCategories').findByPk(product.id);
+            product = await Product.scope(['withCategories', 'withManufacturer']).findByPk(product.id);
 
             return res.json({
                 status: 1,
-                data: productWithCategories
+                data: product
             })
         }
         catch (err) {
