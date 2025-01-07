@@ -10,12 +10,14 @@ module.exports = {
                 type: Sequelize.INTEGER
             },
             barcode: {
-                allowNull: false,
                 type: Sequelize.STRING
             },
             price: {
                 allowNull: false,
-                type: Sequelize.DECIMAL
+                type: Sequelize.DECIMAL(10, 2),
+                validate: {
+                    isDecimal: true
+                }
             },
             quantity: {
                 allowNull: false,

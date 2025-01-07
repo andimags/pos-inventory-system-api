@@ -40,9 +40,14 @@ module.exports = (sequelize, DataTypes) => {
                 }]
             });
         }
+
+        generateBarcode() {
+            return `STK-${String(this.product_id).padStart(4, '0')}-${String(this.supplier_id).padStart(4, '0')}-${String(this.id).padStart(4, '0')}`;
+        }
     }
     Stock.init({
         price: DataTypes.DECIMAL(10, 2),
+        barcode: DataTypes.STRING,
         quantity: DataTypes.INTEGER,
         supplier_id: DataTypes.INTEGER,
         product_id: DataTypes.INTEGER,

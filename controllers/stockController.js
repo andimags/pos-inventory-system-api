@@ -90,8 +90,10 @@ const stockController = {
             let stock = await Stock.create(req.body);
             await stock.setSupplier(supplier_id);
             await stock.setProduct(product_id);
-
+            
             stock = await Stock.scope(['withSupplier', 'withProduct']).findByPk(stock.id);
+            stock.barcode = stock.generateBarcode();
+            await stock.save();
 
             return res.json({
                 status: 1,
@@ -114,7 +116,7 @@ const stockController = {
             }
 
             const { id } = req.params;
-            const stock = await Stock.findByPk(id)
+            let stock = await Stock.findByPk(id)
 
             if (!stock) {
                 return res.json({
@@ -125,11 +127,13 @@ const stockController = {
 
             await stock.update(req.body);
 
-            const stockWithCategories = await Stock.scope(['withSupplier', 'withProduct']).findByPk(stock.id);
+            stock = await Stock.scope(['withSupplier', 'withProduct']).findByPk(stock.id);
+            stock.barcode = stock.generateBarcode();
+            await stock.save();
 
             return res.json({
                 status: 1,
-                data: stockWithCategories
+                data: stock
             })
         }
         catch (err) {

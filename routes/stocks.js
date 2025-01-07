@@ -33,7 +33,7 @@ router.post('/',
     stockController.add
 );
 
-router.put('/:id/products/:product_id',
+router.put('/:id',
     updateStockValidator,
     authMiddleware,
     stockController.update
