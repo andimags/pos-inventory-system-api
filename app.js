@@ -12,6 +12,7 @@ const productRouter = require('./routes/products');
 const categoryRouter = require('./routes/categories');
 const stockRouter = require('./routes/stocks');
 const manufacturerRouter = require('./routes/manufacturers');
+const checkoutSessionRouter = require('./routes/checkoutSessions');
 
 const dotenv = require('dotenv');
 dotenv.config();
@@ -36,6 +37,7 @@ app.use('/manufacturers', manufacturerRouter);
 app.use('/products', productRouter);
 app.use('/categories', categoryRouter);
 app.use('/stocks', stockRouter);
+app.use('/checkout-sessions', checkoutSessionRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

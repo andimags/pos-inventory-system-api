@@ -13,7 +13,8 @@ function authMiddleware(req, res, next) {
 
         const token = authorization.split(' ')[1];
 
-        jwt.verify(token, process.env.PRIVATE_KEY);
+        const decoded = jwt.verify(token, process.env.PRIVATE_KEY);
+        req.user = decoded;
         next();
     }
     catch (err) {

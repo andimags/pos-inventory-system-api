@@ -26,7 +26,7 @@ const authController = {
                 })
             }
 
-            bcrypt.compare(password, user.password, function (err, result) {
+            await bcrypt.compare(password, user.password, function (err, result) {
                 if (!result) {
                     return res.json({
                         status: 0,
@@ -38,6 +38,7 @@ const authController = {
             const token =
                 jwt.sign({
                     data: {
+                        id: user.id,
                         first_name: user.first_name,
                         last_name: user.last_name,
                         email: user.email,
@@ -45,10 +46,13 @@ const authController = {
                     }
                 }, process.env.PRIVATE_KEY, { expiresIn: '1d' });
 
+            const decoded = jwt.verify(token, process.env.PRIVATE_KEY);
+
             return res.json({
                 status: 1,
                 message: 'User successfully logged in.',
-                token: token
+                token: token,
+                decoded: decoded
             })
         }
         catch (err) {
