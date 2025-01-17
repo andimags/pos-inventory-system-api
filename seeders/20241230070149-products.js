@@ -8,7 +8,7 @@ module.exports = {
     async up(queryInterface, Sequelize) {
         const products = [];
 
-        for (let i = 0; i < 5; i++) {
+        for (let i = 0; i < 10; i++) {
             const productName = faker.commerce.product();
             const description = faker.lorem.sentences({ min: 1, max: 2 });
 
