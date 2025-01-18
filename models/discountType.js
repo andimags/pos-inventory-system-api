@@ -10,7 +10,17 @@ module.exports = (sequelize, DataTypes) => {
          * The `models/index` file will call this method automatically.
          */
         static associate(models) {
-            // define association here
+            DiscountType.hasMany(models.Transaction, {
+                foreignKey: 'discount_type_id',
+                as: 'transactions'
+            });
+
+            DiscountType.addScope('withTransactions', {
+                include: [{
+                    model: models.Transaction,
+                    as: 'transactions',
+                }]
+            });
         }
     }
     DiscountType.init({
