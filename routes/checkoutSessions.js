@@ -38,15 +38,16 @@ router.post('/', authMiddleware, async (req, res) => {
 
         const stock = await Stock.scope(['withSupplier', 'withProduct']).findOne({
             where: {
-                'barcode': barcode
+                barcode: barcode
             }
         });
 
         if (!stock) {
-            return res.json({
-                status: 0,
-                message: `Stock with barcode ${barcode} not found`
-            })
+            throw new Error(`Stock with barcode ${barcode} not found`);
+        }
+
+        if (quantity > stock.quantity) {
+            throw new Error(`Quantity cannot be greater than the stock's available quantity (${stock.quantity})`);
         }
 
         const item = {
@@ -66,16 +67,18 @@ router.post('/', authMiddleware, async (req, res) => {
         await redisClient.disconnect();
 
         return res.json(item);
+    } catch (error) {
+        if (redisClient) {
+            await redisClient.disconnect();
+        }
 
-    }
-    catch (error) {
-        await redisClient.disconnect();
         return res.json({
             status: 0,
             message: `Something went wrong: ${error.message}`
         });
     }
 });
+
 
 router.put('/:barcode', authMiddleware, async (req, res) => {
     let redisClient;
