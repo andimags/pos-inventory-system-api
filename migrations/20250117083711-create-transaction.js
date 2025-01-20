@@ -15,11 +15,16 @@ module.exports = {
             total_amount: {
                 type: Sequelize.DECIMAL(10, 2)
             },
-            cash_received: {
-                type: Sequelize.DECIMAL(10, 2)
-            },
             discount_type_id: {
                 type: Sequelize.INTEGER
+            },
+            discount: {
+                allowNull: false,
+                defaultValue: 0.00,
+                type: Sequelize.DECIMAL(10, 2)
+            },
+            final_amount: {
+                type: Sequelize.DECIMAL(10, 2)
             },
             cashier_id: {
                 allowNull: false,

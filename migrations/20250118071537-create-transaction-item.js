@@ -11,11 +11,20 @@ module.exports = {
             },
             transaction_id: {
                 allowNull: false,
-                type: Sequelize.INTEGER
+                type: Sequelize.INTEGER,
+                references: {
+                    model: 'transactions',
+                    key: 'id'
+                },
+                onDelete: 'CASCADE'
             },
             stock_id: {
-                allowNull: false,
-                type: Sequelize.INTEGER
+                type: Sequelize.INTEGER,
+                references: {
+                    model: 'stocks',
+                    key: 'id'
+                },
+                onDelete: 'SET NULL'
             },
             quantity: {
                 allowNull: false,
@@ -24,11 +33,11 @@ module.exports = {
             },
             price: {
                 allowNull: false,
-                type: Sequelize.DECIMAL(10,2)
+                type: Sequelize.DECIMAL(10, 2)
             },
             total_amount: {
                 allowNull: false,
-                type: Sequelize.DECIMAL(10,2)
+                type: Sequelize.DECIMAL(10, 2)
             },
             created_at: {
                 allowNull: false,

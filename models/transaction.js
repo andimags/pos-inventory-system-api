@@ -22,6 +22,7 @@ module.exports = (sequelize, DataTypes) => {
                 foreignKey: {
                     name: 'transaction_id'
                 },
+                onDelete: 'CASCADE'
             });
 
             Transaction.addScope('withDiscountType', {
@@ -42,8 +43,9 @@ module.exports = (sequelize, DataTypes) => {
     Transaction.init({
         customer_name: DataTypes.STRING,
         total_amount: DataTypes.DECIMAL(10, 2),
-        cash_received: DataTypes.DECIMAL(10, 2),
         discount_type_id: DataTypes.INTEGER,
+        discount: DataTypes.DECIMAL(10, 2),
+        final_amount: DataTypes.DECIMAL(10, 2),
         cashier_id: DataTypes.INTEGER
     }, {
         sequelize,

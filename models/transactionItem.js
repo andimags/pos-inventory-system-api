@@ -15,6 +15,7 @@ module.exports = (sequelize, DataTypes) => {
                 foreignKey: {
                     name: 'transaction_id'
                 },
+                onDelete: 'CASCADE'
             });
 
             TransactionItem.belongsTo(models.Stock, {
@@ -22,6 +23,7 @@ module.exports = (sequelize, DataTypes) => {
                 foreignKey: {
                     name: 'stock_id'
                 },
+                onDelete: 'CASCADE',
             });
 
             TransactionItem.addScope('withTransaction', {

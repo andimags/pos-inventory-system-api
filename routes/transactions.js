@@ -2,7 +2,8 @@ const express = require('express');
 const router = express.Router();
 const authMiddleware = require('../middlewares/authMiddleware');
 const { createClient } = require('redis');
-const { Transaction, TransactionItem, Stock } = require('../models/index');
+const { Transaction, TransactionItem, Stock, DiscountType } = require('../models/index');
+const { validationResult } = require('express-validator');
 
 // Validators
 const addUserValidator = require('../validators/user/add');
@@ -16,10 +17,54 @@ const userController = require('../controllers/userController');
 router.get('/:id',
     findUserValidator,
     authMiddleware,
-    userController.find
+    async (req, res) => {
+        try {
+            const error = validationResult(req);
+
+            if (!error.isEmpty()) {
+                return res.json(error);
+            }
+
+            const { id } = req.params;
+            const transaction = await Transaction.scope('withTransactionItems').findByPk(id);
+
+            if (!transaction) {
+                return res.json({
+                    status: 0,
+                    message: 'Transaction not found.'
+                })
+            }
+
+            return res.json({
+                status: 1,
+                data: transaction
+            })
+        }
+        catch (err) {
+            res.json({
+                status: 0,
+                message: `Something went wrong: ${err.message}`
+            })
+        }
+    }
 );
 
-router.get('/', authMiddleware, userController.get);
+router.get('/', authMiddleware, async (req, res) => {
+    try {
+        const transactions = await Transaction.scope('withTransactionItems').findAll();
+
+        return res.json({
+            status: 1,
+            data: transactions
+        })
+    }
+    catch (err) {
+        res.json({
+            status: 0,
+            message: `Something went wrong: ${err.message}`
+        })
+    }
+});
 
 router.post('/',
     // addUserValidator,
@@ -38,14 +83,17 @@ router.post('/',
             checkedOutItems = checkedOutItems.map(checkedOutItem => JSON.parse(checkedOutItem));
             await redisClient.disconnect();
 
-            let transaction = await Transaction.create({...req.body, cashier_id: req.user.data.id});
+            let transaction = await Transaction.create({ ...req.body, cashier_id: req.user.data.id });
 
             const transactionItems = await Promise.all(
                 checkedOutItems.map(async (checkedOutItem) => {
                     const stock = await Stock.findOne({
                         where: { barcode: checkedOutItem.barcode },
                     });
-            
+
+                    stock.quantity -= checkedOutItem.quantity;
+                    await stock.save();
+
                     return {
                         transaction_id: transaction.id,
                         stock_id: stock.id,
@@ -54,7 +102,7 @@ router.post('/',
                         total_amount: checkedOutItem.quantity * stock.price,
                     };
                 })
-            );            
+            );
 
             await TransactionItem.bulkCreate(transactionItems);
 
@@ -64,13 +112,24 @@ router.post('/',
                 }
             });
 
-            transaction.total_amount = totalAmount;
+            const { discount_type_id } = req.body;
+
+            if (discount_type_id) {
+                const discountType = await DiscountType.findByPk(discount_type_id);
+                const discount = totalAmount * discountType.percentage / 100;
+                const finalAmount = totalAmount - discount;
+
+                transaction.total_amount = totalAmount;
+                transaction.discount = discount;
+                transaction.final_amount = finalAmount;
+            }
+
             await transaction.save();
             transaction = await Transaction.scope('withTransactionItems').findByPk(transaction.id);
 
             redisClient = await createClient()
-            .on('error', (err) => console.log('Redis Client Error', err))
-            .connect();
+                .on('error', (err) => console.log('Redis Client Error', err))
+                .connect();
 
             await redisClient.del(redisKey);
             await redisClient.disconnect();
@@ -89,16 +148,41 @@ router.post('/',
     }
 );
 
-router.put('/:id',
-    updateUserValidator,
-    authMiddleware,
-    userController.update
-);
-
 router.delete('/:id',
     deleteUserValidator,
     authMiddleware,
-    userController.delete
+    async (req, res) => {
+        try {
+            const error = validationResult(req);
+
+            if (!error.isEmpty()) {
+                return res.json(error);
+            }
+
+            const { id } = req.params;
+            const transaction = await Transaction.findByPk(id);
+
+            if (!transaction) {
+                return res.json({
+                    status: 0,
+                    message: 'Transaction not found.'
+                })
+            }
+
+            await transaction.destroy();
+
+            return res.json({
+                status: 1,
+                message: "Transaction successfully deleted."
+            })
+        }
+        catch (err) {
+            res.json({
+                status: 0,
+                message: `Something went wrong: ${err.message}`
+            })
+        }
+    }
 );
 
 module.exports = router;
