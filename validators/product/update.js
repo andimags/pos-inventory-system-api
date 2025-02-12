@@ -1,16 +1,22 @@
 const { body } = require('express-validator');
 const { Product } = require('../../models/index');
+const { Op } = require('sequelize');
 
 const updateProductValidator = [
     body('name')
         .notEmpty().withMessage('Name is required')
         .custom(async (value, { req }) => {
-            if (value !== req.body.old_name) {
-                const productExists = await Product.findOne({ where: { name: value } });
-                if (productExists) {
-                    throw new Error('Name already exists');
+            const productExists = await Product.findOne({
+                where: {
+                    name: value,
+                    id: { [Op.not]: req.params.id },
                 }
+            });
+
+            if (productExists) {
+                throw new Error('Name already exists');
             }
+
             return true;
         }),
 
