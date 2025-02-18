@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const authMiddleware = require('../middlewares/authMiddleware');
 
 // Validators
 const loginValidator = require('../validators/auth/login');
@@ -13,6 +14,7 @@ router.post('/login',
 );
 
 router.post('/verify-token',
+    authMiddleware,
     authController.verifyToken
 );
 

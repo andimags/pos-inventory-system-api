@@ -3,6 +3,7 @@ const express = require('express');
 const path = require('path');
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
+const cors = require('cors');
 
 const indexRouter = require('./routes/index');
 const usersRouter = require('./routes/users');
@@ -20,6 +21,11 @@ const dotenv = require('dotenv');
 dotenv.config();
 
 const app = express();
+
+app.use(cors({
+    // origin: 'http://localhost:3000',  // Allow requests from your frontend domain
+    credentials: true               // Allow cookies to be sent with requests
+}));
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));

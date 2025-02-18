@@ -2,6 +2,7 @@ const { User } = require('../models/index');
 const { validationResult } = require('express-validator');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const cookie = require('cookie');
 
 const authController = {
     login: async (req, res, next) => {
@@ -11,7 +12,7 @@ const authController = {
             if (!error.isEmpty()) {
                 return res.json(error);
             }
-            
+
             const { email, password } = req.body;
 
             const user = await User.findOne({
@@ -46,6 +47,14 @@ const authController = {
                     }
                 }, process.env.PRIVATE_KEY, { expiresIn: '1d' });
 
+            res.setHeader('Set-Cookie', cookie.serialize('token', token, {
+                httpOnly: true,           // Prevent access to the cookie via JavaScript
+                secure: process.env.ENVIRONMENT === 'production',  // Set to true in production for secure cookies
+                maxAge: 60 * 60 * 24,     // 1 day expiry
+                path: '/',                // Available for the entire domain
+                sameSite: 'Strict'        // Helps prevent CSRF attacks
+            }));
+
             const decoded = jwt.verify(token, process.env.PRIVATE_KEY);
 
             return res.json({
@@ -64,13 +73,24 @@ const authController = {
     },
     verifyToken: (req, res, next) => {
         try {
-            const { token } = req.body;
-            const decoded = jwt.verify(token, process.env.PRIVATE_KEY);
-            return res.json({
-                status: 1,
-                message: "Token verified.",
-                data: decoded
-            })
+            // const { token } = req.body;
+            // const decoded = jwt.verify(token, process.env.PRIVATE_KEY);
+            // return res.json({
+            //     status: 1,
+            //     message: "Token verified.",
+            //     data: decoded
+            // })
+
+            if (req.user) {
+                return res.json({
+                    status: 1,
+                    message: "Token verified.",
+                    data: req.user
+                })
+            }
+            else{
+                throw new Error("Unauthorized.");
+            }
         }
         catch (err) {
             return res.json({
