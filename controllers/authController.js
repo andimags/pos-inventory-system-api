@@ -60,7 +60,6 @@ const authController = {
             return res.json({
                 status: 1,
                 message: 'User successfully logged in.',
-                token: token,
                 decoded: decoded
             })
         }
@@ -73,19 +72,11 @@ const authController = {
     },
     verifyToken: (req, res, next) => {
         try {
-            // const { token } = req.body;
-            // const decoded = jwt.verify(token, process.env.PRIVATE_KEY);
-            // return res.json({
-            //     status: 1,
-            //     message: "Token verified.",
-            //     data: decoded
-            // })
-
             if (req.user) {
                 return res.json({
                     status: 1,
                     message: "Token verified.",
-                    data: req.user
+                    decoded: req.user
                 })
             }
             else{
