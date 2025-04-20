@@ -6,12 +6,6 @@ const jwt = require('jsonwebtoken');
 const authController = {
     login: async (req, res, next) => {
         try {
-            // const error = validationResult(req);
-
-            // if (!error.isEmpty()) {
-            //     return res.json(error);
-            // }
-            
             const { email, password } = req.body;
 
             const user = await User.findOne({
@@ -26,14 +20,14 @@ const authController = {
                 })
             }
 
-            await bcrypt.compare(password, user.password, function (err, result) {
-                if (!result) {
-                    return res.json({
-                        status: 0,
-                        message: 'Invalid email or password.'
-                    })
-                }
-            });
+            const result = await bcrypt.compare(password, user.password);
+
+            if (!result) {
+                return res.json({
+                    status: 0,
+                    message: 'Invalid email or password.'
+                });
+            }
 
             const token =
                 jwt.sign({
