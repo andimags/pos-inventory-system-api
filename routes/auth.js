@@ -7,8 +7,12 @@ const loginValidator = require('../validators/auth/login');
 // Controllers
 const authController = require('../controllers/authController');
 
+// Middlewares
+const validationMiddleware = require('../middlewares/validationMiddleware');
+
 router.post('/login',
     loginValidator,
+    validationMiddleware,
     authController.login
 );
 

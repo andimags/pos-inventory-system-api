@@ -6,11 +6,11 @@ const jwt = require('jsonwebtoken');
 const authController = {
     login: async (req, res, next) => {
         try {
-            const error = validationResult(req);
+            // const error = validationResult(req);
 
-            if (!error.isEmpty()) {
-                return res.json(error);
-            }
+            // if (!error.isEmpty()) {
+            //     return res.json(error);
+            // }
             
             const { email, password } = req.body;
 
